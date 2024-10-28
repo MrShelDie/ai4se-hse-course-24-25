@@ -1,94 +1,85 @@
-## Практическое задание на тему "Классификация комментариев на ревью"
+# 📘 Machine Learning Assignment 1: Toxic Comment Classification
 
-### Описание задания
+## Overview
 
-Цель данного задания - разработать программное решение на языке Python для
-классификации рецензий исходного кода.
+This project serves as the first assignment in the Machine Learning course at Higher School of Economics (HSE). The goal is to classify toxic comments using advanced machine learning techniques.
 
-Примеры токсичных комментариев:
+## 📂 Functionality
 
+The project consists of three main stages:
+
+1. **Data Preprocessing**: Cleans and prepares the data for model training.
+2. **Model Training**: Trains a logistic regression model and fine-tunes a [**RoBERTa**](https://huggingface.co/FacebookAI/roberta-base) model for toxic comment classification.
+3. **Model Evaluation**: Assesses the trained models' performance.
+
+## 📋 Requirements
+
+Install the necessary dependencies with:
+
+```bash
+pip install -r requirements.txt
+pip install -r requirements_dev.txt
 ```
- - doh. its awful! it should not be our work...
- - Chris, just a question about 'intrusive', how can I understand it? Why it sucks.
+
+## 🚀 Usage
+
+Follow the steps below to run the project.
+
+### 1. Prepare Data
+
+Run the following command to preprocess the data:
+
+```bash
+python main.py prepare -i <input_data_file> -o <output_directory>
 ```
 
-Примеры не токсичных комментариев:
+Arguments:
+  - `-i <input_data_file>`: Path to the input data file (e.g., `data/data.xlsx`)
+  - `-o <output_directory>`: Directory where preprocessed data will be saved (e.g., `data/preprocessed`)
+
+**Note**: This will generate two files: `<output_directory>-train` and `<output_directory>-test`, used for training and testing, respectively.
+
+### 2. Train Model
+
+To train the model, use:
+
+```bash
+python main.py train -d <dataset_directory> -m <model_type> -o <output_model_file> -v <output_vectorizer_file>
 ```
- - Please, remove indention of commit message.
- - Here should be admin_snapshots_client.reset_snapshot_status
+
+Arguments:
+  - `-d <dataset_directory>`: Directory containing the preprocessed training data (e.g., `data/preprocessed-train`)
+  - `-m <model_type>`: Model type to train (e.g., `LogisticRegression` or `RoBERTa`)
+  - `-o <output_model_file>`: Path where the trained model will be saved (e.g., `model/LogisticRegression`)
+  - `-v <output_vectorizer_file>`: Path where the vectorizer will be saved (e.g., `model/vectorizer`)
+
+### 3. Test Model
+
+Run the following to evaluate the model:
+
+```bash
+python main.py test -d <dataset_directory> -m <model_type> -i <input_model_file> -v <input_vectorizer_file>
 ```
 
-### Подзадача 1: Подготовка набора данных
+Arguments:
+  - `-d <dataset_directory>`: Directory containing the preprocessed test data (e.g., `data/preprocessed-test`)
+  - `-m <model_type>`: Model type to test (e.g., `LogisticRegression` or `RoBERTa`)
+  - `-i <input_model_file>`: Path to the trained model (e.g., `models/LogisticRegression`)
+  - `-v <input_vectorizer_file>`: Path to the vectorizer (e.g., `models/vectorizer`)
 
-#### Описание
+## ⚠️ Important Note
 
-**Цель**: Подготовка набора данных, содержащего размеченные рецензии исходного
-кода из репозитория [**ToxiCR**](https://github.com/WSU-SEAL/ToxiCR/tree/master).
+Training the [**RoBERTa**](https://huggingface.co/FacebookAI/roberta-base) model can be time-consuming on a local machine. It’s recommended to use Google Colab with GPU acceleration if you don’t have access to a powerful GPU.
 
-#### Шаги выполнения
+## 💻 Supported Operating Systems
 
-1. Проведите очистку набора данных, устраняя пропущенные значения и дубликаты.
-2. Подготовьте текстовые данные для анализа, выполнив следующие пункты
-(опционально, вдохновлено оригинальной работой авторов репозитория):
- - Удаление URL-ссылок, например ссылок на документацию, посты Stackoverflow
- - Исправление сокращиений слов, например doesn’t -> does not и we’re -> we are
- для унификации токенов. (готовый словарь можно найти в репозитории ToxiCR)
- - Удаление повторяющихся символов: “You’re duumbbbb!,” -> “you are dumb”
- - Удаление специальных символов &, #, ^, *...
- - Исправление специально испорченных ругательных слов (словарь с регулярными
- выражениями также можно найти в репозитории ToxiCR)
- - Ваши предложения по очистке датасета...
-3. После предобработки сохраните подготовленные данные для дальнейшего
-использования
+This project has been tested on Ubuntu 24.
 
-### Подзадача 2: Использование моделей машинного обучения для классификации комментариев
+## 🧠 Models Used
 
-**Цель**: Попробовать набор различных подходов к классификации текстов.
+- **Logistic Regression**: Implemented using [**scikit-learn**](https://scikit-learn.org/stable/supervised_learning.html)
+- [**RoBERTa**](https://huggingface.co/FacebookAI/roberta-base): Fine-tuned for toxic comment classification
 
-**Модели**:
+## 📚 Dataset
 
- - Классические модели (Logistic Regression, Random Forest)
- - [**RoBERTa**](https://huggingface.co/FacebookAI/roberta-base)
- - [**CodeBERT**](https://huggingface.co/microsoft/codebert-base):
-    предобученная модель трансформер семейства BERT, адаптированная для
-    работы с исходным кодом.
-
-#### Шаги выполнения
-
-##### Использование классических методов машинного обучения (библиотека [**scikit-learn**](https://scikit-learn.org/stable/supervised_learning.html))
-
-1. Для преобразования в числовое представление ранее подготовленных текстов
-используйте CountVectorizer и/или TfidfVectorizer.
-2. Обучите модели Random Forest и/или Logistic Regression на полученных
-CountVectorizer и/или TfidfVectorizer.
-3. Проведите оценку качества моделей путем 10-фолдовой кросс-валидации (KFold cross-validation)
-4. Постройте и проанализируйте матрицу несоответствия (confusion matrix).
-5. Попробуйте улучшить качество классификации путем экспериментов с
-гипер-параметрами моделей и методов для извлечения признаков.
-
-##### Использование предобученных моделей (библиотека [**transformers**](https://huggingface.co/docs/transformers/tasks/sequence_classification))
-
-1. Используйте токенизатор RoBERTa (CodeBERT) для преобразования текстовых
-данных в формат, понятный модели.
-2. Инициализируйте модель RoBERTa/CodeBERT
-(`AutoModelForSequenceClassification`) и объект Trainer, который будет
-управлять процессом обучения. Определите параметры обучения, такие как
-количество эпох, размер батча и скорость обучения. Запустите процесс обучения
-модели на обучающих данных.
-3. Оцените качество модели метриками `accuracy`, `precision_recall_fscore_support`,
-добавив в Trainer параметр `compute_metrics`, реализовав соответствующие метрики.
-4. Подготовьте краткий (1-2 стр.) отчет, который будет включать сравнение по
-метрикам accuracy, precision, recall, f1-score всех реализованных моделей на
-отложенном eval наборе данных.
-
-
-### Сроки выполнения
-
-Общий срок выполнения задания: 2 недели
-
-### Дополнительные указания
-
-- При выполнения задания создайте репозиторий на GitHub, в котором будет находиться текущий шаблон и весь код реализации
-- Решение может быть выполнено как в виде модулей на языке Python так и в виде Jupyter Notebook'ов.
-- Используйте виртуальное окружение для установки всех зависимостей, большинство зависимостей уже зафиксировано в шаблоне
-- В отчете опишите все проблемы, с которыми вы столкнулись, и как вы их решили.
+The dataset is sourced from the [**ToxiCR**](https://github.com/WSU-SEAL/ToxiCR/tree/master) repository.
