@@ -10,3 +10,5 @@ __pycache__/
 **/pip-wheel-metadata/**
 
 .mypy_cache/
+
+*/prepared-dataset
