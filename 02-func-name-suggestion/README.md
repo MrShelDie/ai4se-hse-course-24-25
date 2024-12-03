@@ -44,7 +44,6 @@ For example:
 ```
 python main.py prepare-data
 python main.py predict-names
-
 ```
 
 ## 💻 Supported Operating Systems
