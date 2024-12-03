@@ -9,7 +9,15 @@ import evaluate
 
 
 @cache
-def _init_metrics():
+def _init_metrics() -> tuple[evaluate.Metric, evaluate.Metric]:
+    """
+    Initialize and return the exact match and ROUGE metrics.
+
+    Returns
+    -------
+    tuple[evaluate.Metric, evaluate.Metric]
+        A tuple containing the exact match and ROUGE evaluation metrics.
+    """
     return (evaluate.load('exact_match'), evaluate.load('rouge'))
     
 
@@ -17,6 +25,33 @@ def _predict(
     dataset: datasets.Dataset, model: T5ForConditionalGeneration,
     tokenizer: AutoTokenizer, device: str, with_comments: bool
 ) -> None:
+    """
+    Generate predictions for a dataset using a T5 model and evaluate the results.
+
+    This function processes a dataset by generating function name predictions
+    using a pre-trained T5 model. It evaluates the predictions against the
+    actual function names using metrics such as ROUGE-1. The evaluation results
+    are printed, including the worst predictions based on the ROUGE-1 score.
+
+    Parameters
+    ----------
+    dataset : datasets.Dataset
+        The dataset containing functions to predict names for.
+    model : T5ForConditionalGeneration
+        The T5 model used for generating predictions.
+    tokenizer : AutoTokenizer
+        The tokenizer used to encode and decode the text data.
+    device : str
+        The device to run the model on ('cpu' or 'cuda').
+    with_comments : bool
+        Specify whether the dataset includes comments in the function bodies.
+
+    Returns
+    -------
+    None
+        This function does not return any value, but prints the evaluation results.
+
+    """
     examples_count = len(dataset) #10
 
     predictions = []
@@ -54,7 +89,7 @@ def _predict(
     print('*' * 80)
     print()
 
-    # Сравнение всех предикшенов
+    # Comparing all predictions
     desc = f"Comparing predictions for functions {prefix} comments"
     rouge = evaluate.load("rouge")
     results = []
@@ -63,13 +98,13 @@ def _predict(
         rouge_score = rouge.compute(predictions=[pred], references=[ref])['rouge1']
         results.append((pred, ref, dataset[i][key], rouge_score))
 
-    # Сортировка по ROUGE-L (или Exact Match)
-    results.sort(key=lambda x: x[3])  # По ROUGE-L (x[2])
+    # Sorting by ROUGE-L
+    results.sort(key=lambda x: x[3])
 
-    # Самые плохие предикшены
-    worst_predictions = results[:5]  # Топ-3 самых плохих
+    # The worst predictions
+    worst_predictions = results[:5]
 
-    # Вывод результатов
+    # Printing results
     print()
     print('*' * 80)
     print(f"The worst predictions for functions {prefix} comments:")
@@ -85,6 +120,21 @@ def _predict(
 
 
 def predict(dataset: datasets.Dataset, model_name: str) -> None:
+    """
+    Evaluate a model on a given dataset.
+
+    Parameters
+    ----------
+    dataset : datasets.Dataset
+        The dataset to evaluate the model on.
+    model_name : str
+        The name of the model to evaluate.
+
+    Returns
+    -------
+    None
+        This function does not return any value.
+    """
     checkpoint = model_name
     device = "cpu"
 
@@ -98,6 +148,23 @@ def predict(dataset: datasets.Dataset, model_name: str) -> None:
 def run_evaluate(
     predictions: Iterable[str], references: Iterable[str]
 ) -> dict[str, float]:
+    """
+    Evaluate predictions against references using exact match and ROUGE metrics.
+
+    Parameters
+    ----------
+    predictions : Iterable[str]
+        The predictions to evaluate.
+    references : Iterable[str]
+        The references to evaluate against.
+
+    Returns
+    -------
+    dict[str, float]
+        A dictionary with the evaluation results. The keys are the names of the
+        metrics, and the values are the scores. The metrics are `exact_match`,
+        `rouge1`, `rouge2`, `rougeL`, and `rougeLsum`.
+    """
     em, rouge = _init_metrics()
     em_score = em.compute(predictions=predictions, references=references)
     rouge_scores = rouge.compute(predictions=predictions, references=references)

@@ -5,12 +5,27 @@ from funccraft.data import load_dataset, prepare, save_dataset
 from funccraft.models import predict
 
 
-def main():
+def main() -> None:
+    """
+    Entrypoint for command-line interface.
+
+    Parses command-line arguments and calls the corresponding function.
+    """
     args = parse_args()
     args.func(args)
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command line arguments.
+
+    This function creates an argparse.ArgumentParser object and populates it with
+    subparsers for the prepare-data and predict-names commands. It then parses the
+    command line arguments and returns the parsed arguments as a Namespace object.
+
+    Returns:
+        argparse.Namespace: the parsed command line arguments
+    """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest='cmd')
 
@@ -52,12 +67,31 @@ def parse_args():
     return parser.parse_args()
 
 
-def prepare_data(args):
+def prepare_data(args) -> None:
+    """
+    Prepare a dataset by processing the input data and saving the output.
+
+    Args:
+        args (argparse.Namespace): The arguments containing the language and output path.
+
+    Returns:
+        None
+    """
     dataset = prepare(args.language)
     save_dataset(dataset, args.output, args.language)
 
 
-def predict_names(args):
+def predict_names(args) -> None:
+    """
+    Predict function names for a given dataset using a pre-trained model.
+
+    Args:
+        args (argparse.Namespace): The arguments containing the dataset path
+            and model name.
+
+    Returns:
+        None
+    """
     dataset = load_dataset(args.dataset)
     predict(dataset, args.model)
 
