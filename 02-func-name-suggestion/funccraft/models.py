@@ -8,9 +8,6 @@ import datasets
 import evaluate
 
 
-EXAMPLES_COUNT = 1000
-
-
 @cache
 def _init_metrics():
     return (evaluate.load('exact_match'), evaluate.load('rouge'))
@@ -20,7 +17,7 @@ def _predict(
     dataset: datasets.Dataset, model: T5ForConditionalGeneration,
     tokenizer: AutoTokenizer, device: str, with_comments: bool
 ) -> None:
-    
+    examples_count = len(dataset) #10
 
     predictions = []
     references = []
@@ -29,7 +26,7 @@ def _predict(
     desc = f"Processing functions {prefix} comments"
 
     # for i in range(len(dataset)):
-    for i in tqdm(range(EXAMPLES_COUNT), desc=desc, ncols=100):
+    for i in tqdm(range(examples_count), desc=desc, ncols=100):
         key = "my_func_with_comments" if with_comments else "my_func_without_comments"
         inputs = tokenizer.encode(dataset[i][key], return_tensors="pt").to(device)
         outputs = model.generate(inputs, max_length=30)
@@ -61,7 +58,7 @@ def _predict(
     desc = f"Comparing predictions for functions {prefix} comments"
     rouge = evaluate.load("rouge")
     results = []
-    for i in tqdm(range(EXAMPLES_COUNT), desc=desc, ncols=100):
+    for i in tqdm(range(examples_count), desc=desc, ncols=100):
         pred, ref = predictions[i], references[i]
         rouge_score = rouge.compute(predictions=[pred], references=[ref])['rouge1']
         results.append((pred, ref, dataset[i][key], rouge_score))

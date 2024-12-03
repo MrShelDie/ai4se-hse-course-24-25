@@ -15,6 +15,7 @@ def parse_args():
     subparsers = parser.add_subparsers(dest='cmd')
 
     default_data_path = Path('./prepared-dataset')
+    default_language = 'python'
     prepare_data_parser = subparsers.add_parser('prepare-data')
     prepare_data_parser.set_defaults(func=prepare_data)
     prepare_data_parser.add_argument(
@@ -24,6 +25,14 @@ def parse_args():
         type=Path,
         default=default_data_path,
     )
+    prepare_data_parser.add_argument(
+        '-l',
+        '--language',
+        help='Programming language',
+        choices=['python', 'java'],
+        type=str,
+        default='python',
+    )
 
     predict_parser = subparsers.add_parser('predict-names')
     predict_parser.set_defaults(func=predict_names)
@@ -32,7 +41,7 @@ def parse_args():
         '--dataset',
         help='Path to prepared dataset',
         type=Path,
-        default=default_data_path,
+        default=Path(str(default_data_path) + '-' + default_language),
     )
     predict_parser.add_argument(
         '-m',
@@ -44,8 +53,8 @@ def parse_args():
 
 
 def prepare_data(args):
-    dataset = prepare()
-    save_dataset(dataset, args.output)
+    dataset = prepare(args.language)
+    save_dataset(dataset, args.output, args.language)
 
 
 def predict_names(args):
